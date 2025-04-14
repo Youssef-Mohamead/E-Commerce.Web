@@ -1,5 +1,7 @@
 
+using DomainLayer.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Persistence;
 using Persistence.Data;
 
 namespace E_Commerce.Web
@@ -10,7 +12,7 @@ namespace E_Commerce.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            #region Add services to the container
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -20,13 +22,20 @@ namespace E_Commerce.Web
                 Options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
-           
+            builder.Services.AddScoped<IDataSeeding, DataSeeding>();
 
-
+            #endregion
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+
+            var Scoope = app.Services.CreateScope();
+
+            var ObjectOfDataSeeding = Scoope.ServiceProvider.GetRequiredService<IDataSeeding>();
+            ObjectOfDataSeeding.DataSeed();
+
+
+            #region Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -41,6 +50,7 @@ namespace E_Commerce.Web
             app.MapControllers();
 
             app.Run();
+            #endregion
         }
     }
 }
