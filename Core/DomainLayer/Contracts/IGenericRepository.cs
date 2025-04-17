@@ -10,7 +10,7 @@ namespace DomainLayer.Contracts
     public interface IGenericRepository<TEntity , TKey> where TEntity : BaseEntity<TKey>
     {
      
-         Task<IEnumerable<TEntity>> GetAllAsync();
+         Task<IEnumerable<TEntity>> GetAllAsync(bool TrackChanges =false);
          Task<TEntity?> GetByIdAsunc(TKey id);
          Task AddAsync(TEntity entity);
 
