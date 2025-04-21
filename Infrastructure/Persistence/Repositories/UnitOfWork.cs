@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DomainLayer.Contracts;
+using DomainLayer.Models;
+using Persistence.Data;
+
+namespace Persistence.Repositories
+{
+    public class UnitOfWork(StoreDbContext _dbContext) : IUnitOfWork
+    {
+        private readonly Dictionary<string, object> _repositories = [];
+        public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
+        {
+            // Get Type Name
+            var typeName = typeof(TEntity).Name;
+            //Dic<String,Object> ==> String Key [Name Of Type] -- Object Object From Generic Repository
+            //if (_repositories.ContainsKey(typeName))
+            //    return (IGenericRepository<TEntity, TKey>)_repositories[typeName];
+
+            if (_repositories.TryGetValue(typeName, out object? value))
+                return (IGenericRepository<TEntity, TKey>)value;
+
+
+            else
+            {
+                // Create Object
+                var Repo = new GenericRepository<TEntity, TKey>(_dbContext);
+                // Store Object in Dic
+                _repositories["typeName"] = Repo;
+                // Return Object
+                return Repo;
+
+            }
+        }
+        public async Task<int> SaveChanges() => await _dbContext.SaveChangesAsync();
+
+    }
+}
+

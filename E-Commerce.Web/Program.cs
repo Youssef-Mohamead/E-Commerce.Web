@@ -3,12 +3,16 @@ using DomainLayer.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
+using Persistence.Repositories;
+using Service;
+using Service.MappingProfiles;
+using ServiceAbstraction;
 
 namespace E_Commerce.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -23,16 +27,19 @@ namespace E_Commerce.Web
 
             });
             builder.Services.AddScoped<IDataSeeding, DataSeeding>();
-
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddAutoMapper(typeof(Service.AssemblyReference).Assembly);
+            builder.Services.AddScoped<IServiceManager , ServiceManager>();
             #endregion
 
             var app = builder.Build();
 
 
+            #region Data Seeding
             var Scoope = app.Services.CreateScope();
-
-            var ObjectOfDataSeeding = Scoope.ServiceProvider.GetRequiredService<IDataSeeding>();
-            ObjectOfDataSeeding.DataSeed();
+            var DataSeedingObject = Scoope.ServiceProvider.GetRequiredService<IDataSeeding>();
+            await DataSeedingObject.DataSeedAsync(); 
+            #endregion
 
 
             #region Configure the HTTP request pipeline.
@@ -43,7 +50,7 @@ namespace E_Commerce.Web
             }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseAuthorization();
 
 
