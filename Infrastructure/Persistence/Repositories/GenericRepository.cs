@@ -20,6 +20,19 @@ namespace Persistence.Repositories
 
         public void Update(TEntity entity) =>  _dbContext.Set<TEntity>().Update(entity);
 
+        #region With Specifications
+        public async Task<TEntity?> GetByIdAsunc(ISpecifications<TEntity, TKey> specifications)
+        {
+         return await SpecificationEvaluator.CreateQuery(_dbContext.Set<TEntity>(), specifications).FirstOrDefaultAsync();
 
+
+        }
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity, TKey> specifications)
+        {
+            return await SpecificationEvaluator.CreateQuery(_dbContext.Set<TEntity>(), specifications).ToListAsync();
+
+        }
+        #endregion
     }
 }
