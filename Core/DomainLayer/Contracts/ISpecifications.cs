@@ -13,7 +13,7 @@ namespace DomainLayer.Contracts
 
         // Property Signature for Each Dynamic Part in Query
 
-        public Expression<Func<TEntity ,bool>> Criteria { get; }
+        public Expression<Func<TEntity ,bool>>? Criteria { get; }
         List<Expression<Func<TEntity,object>>> IncludeExpressions { get; }
     }
 }
