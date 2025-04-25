@@ -1,5 +1,6 @@
 
 using DomainLayer.Contracts;
+using E_Commerce.Web.CustomMiddleWares;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
@@ -38,9 +39,10 @@ namespace E_Commerce.Web
             #region Data Seeding
             var Scoope = app.Services.CreateScope();
             var DataSeedingObject = Scoope.ServiceProvider.GetRequiredService<IDataSeeding>();
-            await DataSeedingObject.DataSeedAsync(); 
+            await DataSeedingObject.DataSeedAsync();
             #endregion
 
+            app.UseMiddleware<CustomExceptionHandlerMiddleWare>();
 
             #region Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
