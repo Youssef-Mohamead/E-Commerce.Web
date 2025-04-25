@@ -3,6 +3,7 @@ using System.Text.Json;
 using DomainLayer.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Shared.ErrorModels;
 
 namespace E_Commerce.Web.CustomMiddleWares
@@ -22,32 +23,53 @@ namespace E_Commerce.Web.CustomMiddleWares
             try
             {
 
-            await _next.Invoke(httpContext);
-           
+                await _next.Invoke(httpContext);
+
+                await HandleNotFoundEndPointAsync(httpContext);
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Something Went Wrong");
-                // Set Statues Code For Response
+                await HandleExceptionAsync(httpContext, ex);
+            }
+        }
 
-                httpContext.Response.StatusCode = ex switch
-                {
-                    NotFoundException =>StatusCodes.Status404NotFound,
+        private static async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+        {
+            // Set Statues Code For Response
 
-                    _ => StatusCodes.Status500InternalServerError
-                };
+            httpContext.Response.StatusCode = ex switch
+            {
+                NotFoundException => StatusCodes.Status404NotFound,
 
-                // Set Content Type For Response
-                httpContext.Response.ContentType = "application/json";
+                _ => StatusCodes.Status500InternalServerError
+            };
 
-                //Response Object
+            // Set Content Type For Response
+            httpContext.Response.ContentType = "application/json";
+
+            //Response Object
+            var Response = new ErrorToReturn()
+            {
+                StatusCode = httpContext.Response.StatusCode,
+                ErrorMessage = ex.Message
+            };
+
+            //Return Object As JSON
+            await httpContext.Response.WriteAsJsonAsync(Response);
+        }
+
+        private static async Task HandleNotFoundEndPointAsync(HttpContext httpContext)
+        {
+            if (httpContext.Response.StatusCode == StatusCodes.Status404NotFound)
+            {
                 var Response = new ErrorToReturn()
                 {
-                    StatusCode = httpContext.Response.StatusCode, 
-                    ErrorMessage = ex.Message
+                    StatusCode = StatusCodes.Status404NotFound,
+                    ErrorMessage = $"End Point {httpContext.Request.Path} Is Not Found"
                 };
 
-                //Return Object As JSON
                 await httpContext.Response.WriteAsJsonAsync(Response);
             }
         }
