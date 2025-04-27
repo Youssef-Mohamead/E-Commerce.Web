@@ -1,6 +1,7 @@
 
 using DomainLayer.Contracts;
 using E_Commerce.Web.CustomMiddleWares;
+using E_Commerce.Web.Extensions;
 using E_Commerce.Web.Factories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,41 +23,28 @@ namespace E_Commerce.Web
 
             #region Add services to the container
 
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<StoreDbContext>(Options =>
-            {
-                Options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            builder.Services.AddControllers();           
+            builder.Services.AddSwaggerServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);          
+            builder.Services.AddApplicationSeervice();
+            builder.Services.AddWebApplicationService();
 
-            });
-            builder.Services.AddScoped<IDataSeeding, DataSeeding>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddAutoMapper(typeof(Service.AssemblyReference).Assembly);
-            builder.Services.AddScoped<IServiceManager , ServiceManager>();
-            builder.Services.Configure<ApiBehaviorOptions>((Options) =>
-            {
-                Options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationErrorsResponse;
-                
-            });
             #endregion
 
-            var app = builder.Build();
+             var app = builder.Build();
 
 
             #region Data Seeding
-            var Scoope = app.Services.CreateScope();
-            var DataSeedingObject = Scoope.ServiceProvider.GetRequiredService<IDataSeeding>();
-            await DataSeedingObject.DataSeedAsync();
+            await app.SeedDataBaseAsync();
             #endregion
 
-            app.UseMiddleware<CustomExceptionHandlerMiddleWare>();
+   
 
             #region Configure the HTTP request pipeline.
+            app.UseCustomExceptionMiddleWare();
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerMiddleWares();
             }
 
             app.UseHttpsRedirection();
