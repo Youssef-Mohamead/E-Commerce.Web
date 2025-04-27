@@ -40,6 +40,7 @@ namespace E_Commerce.Web
 
    
 
+
             #region Configure the HTTP request pipeline.
             app.UseCustomExceptionMiddleWare();
             if (app.Environment.IsDevelopment())
