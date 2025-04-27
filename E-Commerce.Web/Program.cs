@@ -23,22 +23,22 @@ namespace E_Commerce.Web
 
             #region Add services to the container
 
-            builder.Services.AddControllers();           
+            builder.Services.AddControllers();
             builder.Services.AddSwaggerServices();
-            builder.Services.AddInfrastructureServices(builder.Configuration);          
+            builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationSeervice();
             builder.Services.AddWebApplicationService();
 
             #endregion
 
-             var app = builder.Build();
+            var app = builder.Build();
 
 
             #region Data Seeding
             await app.SeedDataBaseAsync();
             #endregion
 
-   
+
 
 
             #region Configure the HTTP request pipeline.
