@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAbstraction;
 using Shared;
-using Shared.DataTransferObjects;
+using Shared.DataTransferObjects.ProductDTOs;
 
 namespace Presentation.Controllers
 {
