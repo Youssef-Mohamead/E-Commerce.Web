@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceAbstraction;
 using Shared;
@@ -15,6 +16,7 @@ namespace Presentation.Controllers
     public class ProductsController(IServiceManager _serviceManager) : ApiBaseController
     {
         //Get All Products
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public async Task<ActionResult<PaginatedResult<ProductDto>>> GetAllProducts([FromQuery]ProductQueryParams queryParams)
         {
