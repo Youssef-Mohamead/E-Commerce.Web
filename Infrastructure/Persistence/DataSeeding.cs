@@ -5,27 +5,30 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DomainLayer.Contracts;
+using DomainLayer.Models.IdentityModule;
 using DomainLayer.Models.ProductModule;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
+using Persistence.Identity;
 
 namespace Persistence
 {
-    public class DataSeeding(StoreDbContext _dbContext) : IDataSeeding
+    public class DataSeeding(StoreDbContext _dbContext, UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager, StoreIdentityDbContext _identityDbContext) : IDataSeeding
     {
         public async Task DataSeedAsync()
         {
             try
             {
 
-               // Create Database If it dosen't Exists && Apply To Any Pending Migrations
+                // Create Database If it dosen't Exists && Apply To Any Pending Migrations
                 var PendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync();
                 if (PendingMigrations.Any())
                 {
                     await _dbContext.Database.MigrateAsync();
                 }
 
-              // Data Seeding
+                // Data Seeding
                 if (!_dbContext.ProductBrands.Any())
                 {
                     // Read All data From Brands Json Files
@@ -59,10 +62,10 @@ namespace Persistence
                     var Products = await JsonSerializer.DeserializeAsync<List<Product>>(ProductData);
 
                     if (Products is not null && Products.Any())
-                       await _dbContext.Products.AddRangeAsync(Products);
+                        await _dbContext.Products.AddRangeAsync(Products);
                 }
 
-              await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -70,6 +73,50 @@ namespace Persistence
                 //TODO
 
             }
+        }
+
+        public async Task IdentityDataSeedAsync()
+        {
+            try
+            {
+                if (!_roleManager.Roles.Any())
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    await _roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+                }
+
+                if (!_userManager.Users.Any())
+                {
+                    var User01 = new ApplicationUser()
+                    {
+                        Email = "YoussefMohamed@gmail.com",
+                        DisplayName = "Youssef Mohamed",
+                        PhoneNumber = "01128088595",
+                        UserName = "YoussefMohamed"
+                    };
+                    var User02 = new ApplicationUser()
+                    {
+                        Email = "OmarMohamed@gmail.com",
+                        DisplayName = "Omar Mohamed",
+                        PhoneNumber = "012345678",
+                        UserName = "OmarMohamed"
+                    };
+
+                    await _userManager.CreateAsync(User01, "P@ssw0rd");
+                    await _userManager.CreateAsync(User02, "P@ssw0rd");
+
+                    _userManager.AddToRoleAsync(User01, "Admin");
+                    _userManager.AddToRoleAsync(User02, "SuperAdmin");
+                }
+
+             await  _identityDbContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+
         }
     }
 }
