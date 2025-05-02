@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using DomainLayer.Contracts;
+using DomainLayer.Models.IdentityModule;
+using Microsoft.AspNetCore.Identity;
 using ServiceAbstraction;
 
 namespace Service
 {
-    public class ServiceManager(IUnitOfWork unitOfWork ,IMapper mapper, IBasketRepository basketRepository) : IServiceManager
+    public class ServiceManager(IUnitOfWork unitOfWork ,IMapper mapper, IBasketRepository basketRepository , UserManager<ApplicationUser> userManager) : IServiceManager
     {
         private readonly Lazy<IProductService> _LazyProductService = new Lazy<IProductService>( () => new ProductService(unitOfWork , mapper));    
         public IProductService ProductService =>  _LazyProductService.Value;
@@ -17,5 +19,9 @@ namespace Service
 
         private readonly Lazy<IBasketService> _LazyBasketService = new Lazy<IBasketService>( () => new BasketService(basketRepository, mapper));
         public IBasketService BasketService => _LazyBasketService.Value;
+
+      
+        private readonly Lazy<IAuthenticationService> _LazyAuthenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(userManager));
+        public IAuthenticationService AuthenticationService => _LazyAuthenticationService.Value;
     }
 }
