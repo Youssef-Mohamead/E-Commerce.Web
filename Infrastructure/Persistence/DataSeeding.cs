@@ -29,7 +29,7 @@ namespace Persistence
                 }
 
                 // Data Seeding
-                if (!_dbContext.ProductBrands.Any())
+                if (!_dbContext.Set<ProductBrand>().Any())
                 {
                     // Read All data From Brands Json Files
                     var ProductBrandData = File.OpenRead(@"..\Infrastructure\Persistence\Data\DataSeed\brands.json");
@@ -41,7 +41,7 @@ namespace Persistence
                         await _dbContext.ProductBrands.AddRangeAsync(ProductBrands);
                 }
 
-                if (!_dbContext.ProductTypes.Any())
+                if (!_dbContext.Set<ProductType>().Any())
                 {
                     // Read All data From Types Json Files
                     var ProductTypeData = File.OpenRead(@"..\Infrastructure\Persistence\Data\DataSeed\types.json");
@@ -53,7 +53,7 @@ namespace Persistence
                         await _dbContext.ProductTypes.AddRangeAsync(ProductTypes);
                 }
 
-                if (!_dbContext.Products.Any())
+                if (!_dbContext.Set<Product>().Any())
                 {
                     // Read All data From Products Json Files
                     var ProductData = File.OpenRead(@"..\Infrastructure\Persistence\Data\DataSeed\products.json");
@@ -63,6 +63,18 @@ namespace Persistence
 
                     if (Products is not null && Products.Any())
                         await _dbContext.Products.AddRangeAsync(Products);
+                }
+
+                if (!_dbContext.Set<DeliveryMethod>().Any())
+                {
+                    // Read All data From Products Json Files
+                    var DeliveryMethodData = File.OpenRead(@"..\Infrastructure\Persistence\Data\DataSeed\delivery.json");
+                    // Convert Data "String" => C# Objects [Productbrand]
+                    //Transform String To C# Objects [List<Products>]
+                    var DeliveryMethods = await JsonSerializer.DeserializeAsync<List<DeliveryMethod>>(DeliveryMethodData);
+
+                    if (DeliveryMethods is not null && DeliveryMethods.Any())
+                        await _dbContext.Set<DeliveryMethod>().AddRangeAsync(DeliveryMethods);
                 }
 
                 await _dbContext.SaveChangesAsync();
@@ -109,7 +121,7 @@ namespace Persistence
                     _userManager.AddToRoleAsync(User02, "SuperAdmin");
                 }
 
-             await  _identityDbContext.SaveChangesAsync();
+            // await  _identityDbContext.SaveChangesAsync();
             }
             catch(Exception ex)
             {
