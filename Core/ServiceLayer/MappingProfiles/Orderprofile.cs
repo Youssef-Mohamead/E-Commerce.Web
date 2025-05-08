@@ -7,6 +7,7 @@ using AutoMapper;
 using DomainLayer.Models.Order_Module;
 using DomainLayer.Models.ProductModule;
 using Shared.DataTransferObjects.IdentityDTOs;
+using Shared.DataTransferObjects.OrderDTOs;
 using Shared.DataTransferObjects.ProductDTOs;
 
 namespace Service.MappingProfiles
@@ -15,7 +16,16 @@ namespace Service.MappingProfiles
     {
         public Orderprofile()
         {
-            CreateMap<AddressDTO, OrderAddress>();
+            CreateMap<AddressDTO, OrderAddress>().ReverseMap();
+
+            CreateMap<Order, OrderToReturnDTO>()
+                .ForMember(dist => dist.DeliveryMethod, Options => Options.MapFrom(Src => Src.DeliveryMethod.ShortName));
+
+
+            CreateMap<OrderItem, OrderItemDTO>()
+                .ForMember(dist => dist.ProductName, Options => Options.MapFrom(Src => Src.Product.ProductName))
+                .ForMember(dist => dist.PictureUrl, Options => Options.MapFrom<OrderItemPictureUrlResolver>());
+
         }
     }
 }
