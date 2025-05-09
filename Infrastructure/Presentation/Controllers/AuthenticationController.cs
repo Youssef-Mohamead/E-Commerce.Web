@@ -44,8 +44,7 @@ namespace Presentation.Controllers
         [HttpGet("CurrentUser")]//GET BaseUrl/api/Authentication/CurrentUser
         public async Task<ActionResult<UserDTO>> GetCurrentUser()
         {
-            var email =  User.FindFirstValue(ClaimTypes.Email);
-            var AppUser = await _serviceManager.AuthenticationService.GetCurrentUserAsync(email!);
+            var AppUser = await _serviceManager.AuthenticationService.GetCurrentUserAsync(GetEmailFromToken());
             return Ok(AppUser);
         }
         //Get Current User Address
