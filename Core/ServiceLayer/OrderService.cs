@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using DomainLayer.Contracts;
 using DomainLayer.Exceptions;
 using DomainLayer.Models.Order_Module;
 using DomainLayer.Models.ProductModule;
+using Service.Specifications.OrderModuleSpecifications;
 using ServiceAbstraction;
 using Shared.DataTransferObjects.IdentityDTOs;
 using Shared.DataTransferObjects.OrderDTOs;
@@ -50,10 +52,10 @@ namespace Service
             var SubTotal = OrderItems.Sum(I => I.Quantity * I.Price);
 
             var Order = new Order(Email, OrderAddress, DeliveryMethod, OrderItems, SubTotal);
-         
-            await _unitOfWork.GetRepository<Order,Guid>().AddAsync(Order);
+
+            await _unitOfWork.GetRepository<Order, Guid>().AddAsync(Order);
             await _unitOfWork.SaveChanges();
-            return _mapper.Map<Order , OrderToReturnDTO>(Order);
+            return _mapper.Map<Order, OrderToReturnDTO>(Order);
         }
 
         private static OrderItem CreateOrderItem(DomainLayer.Models.BasketModule.BasketItem item, Product product)
@@ -69,6 +71,26 @@ namespace Service
                 Price = product.Price,
                 Quantity = item.Quantity
             };
+        }
+
+        public async Task<IEnumerable<DeliveryMethodDTOs>> GetDeliveryMethodsAsync()
+        {
+            var DeliveryMethods = await _unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync();
+            return _mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTOs>>(DeliveryMethods);
+        }
+
+        public async Task<IEnumerable<OrderToReturnDTO>> GetAllOrdersAsync(string Email)
+        {
+            var Spec = new OrderSpecifications(Email);
+            var Orders = await _unitOfWork.GetRepository<Order, Guid>().GetAllAsync(Spec);
+            return _mapper.Map<IEnumerable<Order>, IEnumerable<OrderToReturnDTO>>(Orders);
+        }
+
+        public async Task<OrderToReturnDTO> GetOrderByIdAsync(Guid Id)
+        {
+            var Spec = new OrderSpecifications(Id);
+            var Order = await _unitOfWork.GetRepository<Order, Guid>().GetByIdAsunc(Spec);
+            return _mapper.Map<Order, OrderToReturnDTO>(Order);
         }
     }
 }
